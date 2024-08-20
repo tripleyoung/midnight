@@ -1,6 +1,11 @@
 server:
   port: 8080
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
   config:
     import: optional:file:.env[.properties]
   datasource:
@@ -17,7 +22,7 @@ spring:
         format_sql: true
     hibernate:
 
-      ddl-auto: create
+      ddl-auto: update
   profiles:
     active: prod
 
@@ -27,7 +32,7 @@ jwt:
 
 
 minio:
-  url: http://localhost:9000
+  url: http://172.16.16.169:9000
   accessKey: MY-USER
   secretKey: MY-PASSWORD
-  bucketName: sns-files
+  bucketName: midnight-files

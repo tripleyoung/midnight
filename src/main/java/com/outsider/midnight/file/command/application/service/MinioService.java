@@ -36,7 +36,7 @@ public class MinioService {
 
         // 파일 업로드
         minioClient.putObject(
-                PutObjectArgs.builder().bucket(bucketName).object(file.getOriginalFilename()).stream(
+                PutObjectArgs.builder().bucket(bucketName).object(sb.toString()).stream(
                                 file.getInputStream(), file.getSize(), -1)
                         .contentType(file.getContentType())
                         .build());

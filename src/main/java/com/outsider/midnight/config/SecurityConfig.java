@@ -54,7 +54,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/**").permitAll()
-                        .requestMatchers("/**").access(customAuthorizationManager)
+//                        .requestMatchers("/**").access(customAuthorizationManager)
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
