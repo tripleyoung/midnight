@@ -16,7 +16,7 @@ public class FileController {
     @Autowired
     private MinioService minioService;
 
-    @PostMapping("/upload2")
+    @PostMapping("/upload")
     public ResponseEntity<UploadResponse> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             System.out.println(file.getOriginalFilename());
@@ -32,7 +32,7 @@ public class FileController {
             String mnStatus = "Normal"; // replace with actual mental status if needed
 
             // Create response object
-            UploadResponse response = new UploadResponse(returnCode, returnMsg, imgTitle, recogMsg, mnStatus);
+            UploadResponse response = new UploadResponse(returnCode, returnMsg, imgTitle, recogMsg);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -40,7 +40,6 @@ public class FileController {
             UploadResponse errorResponse = new UploadResponse(
                     "500",
                     "Error uploading file.",
-                    null,
                     null,
                     null
             );

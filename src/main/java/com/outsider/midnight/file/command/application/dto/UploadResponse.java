@@ -5,15 +5,12 @@ public class UploadResponse {
     private String returnMsg;
     private String imgTitle;
     private String recogMsg;
-    private String mnStatus;
-
     // Constructor
-    public UploadResponse(String returnCode, String returnMsg, String imgTitle, String recogMsg, String mnStatus) {
+    public UploadResponse(String returnCode, String returnMsg, String imgTitle, String recogMsg) {
         this.returnCode = returnCode;
         this.returnMsg = returnMsg;
         this.imgTitle = imgTitle;
         this.recogMsg = recogMsg;
-        this.mnStatus = mnStatus;
     }
 
     // Getters and setters
@@ -29,6 +26,5 @@ public class UploadResponse {
     public String getRecogMsg() { return recogMsg; }
     public void setRecogMsg(String recogMsg) { this.recogMsg = recogMsg; }
 
-    public String getMnStatus() { return mnStatus; }
-    public void setMnStatus(String mnStatus) { this.mnStatus = mnStatus; }
+
 }

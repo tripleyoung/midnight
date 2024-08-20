@@ -20,6 +20,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.web.reactive.function.client.WebClient;
+
 import java.util.concurrent.CompletableFuture;
 @EnableAsync
 @RestController
@@ -43,7 +45,9 @@ public class AIContoller {
     public DeferredResult<ResponseEntity<UploadResponse>> uploadFile(@RequestParam("file") MultipartFile file) {
         DeferredResult<ResponseEntity<UploadResponse>> deferredResult = new DeferredResult<>();
 
-        // 비동기적으로 파일 업로드 및 AI 분석 요청 처리
+        // WebClient 생성
+        WebClient webClient = WebClient.builder().build();
+
         CompletableFuture.runAsync(() -> {
             try {
                 // 파일 업로드 처리
@@ -54,35 +58,37 @@ public class AIContoller {
                 AnalysisRequest analysisRequest = new AnalysisRequest();
                 analysisRequest.setImageUrl(url);
 
-                // RestClient를 사용하여 AI 분석 서비스 호출 (동기)
-                RestClient restClient = RestClient.builder().build();
-
-                AnalysisResponse analysisResponse = restClient.post()
+                // WebClient를 사용하여 AI 분석 서비스 호출 (비동기)
+                webClient.post()
                         .uri("http://172.16.17.203:8000/analyze")  // AI 분석 서비스의 URL
-                        .body(analysisRequest)
+                        .bodyValue(analysisRequest)
                         .retrieve()
-                        .body(AnalysisResponse.class);
+                        .bodyToMono(AnalysisResponse.class)
+                        .doOnNext(analysisResponse -> {
+                            // 분석 결과 저장
+                            AnalysisResult analysisResult = new AnalysisResult();
+                            analysisResult.setImageUrl(url);
+                            analysisResult.setAnalysis(analysisResponse.getAnalysis());
+                            analysisResult.setImageName(fileNames);
+                            aiResultRepository.save(analysisResult);
 
-                AnalysisResult analysisResult = new AnalysisResult();
-                analysisResult.setImageUrl(url);
-                analysisResult.setAnalysis(analysisResponse.getAnalysis());
-                analysisResult.setImageName(fileNames);
-                analysisResult.setMnStatus("analysisResponse.getMnStatus()");
-                aiResultRepository.save(analysisResult);
-
-                // 응답 생성
-                UploadResponse response = new UploadResponse(
-                        "200",
-                        "File uploaded and analyzed successfully",
-                        file.getOriginalFilename(),
-                        analysisResponse.getAnalysis(),
-                        "analysisResponse.getMnStatus()"
-                );
-
-                deferredResult.setResult(ResponseEntity.ok(response));
+                            // 성공 응답 생성
+                            UploadResponse response = new UploadResponse(
+                                    "200",
+                                    "File uploaded and analyzed successfully",
+                                    file.getOriginalFilename(),
+                                    analysisResponse.getAnalysis()
+                            );
+                            deferredResult.setResult(ResponseEntity.ok(response));
+                        })
+                        .doOnError(e -> {
+                            deferredResult.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .body(new UploadResponse("500", e.getMessage(), null, null)));
+                        })
+                        .subscribe();
             } catch (Exception e) {
                 deferredResult.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(new UploadResponse("500", e.getMessage(), null, null, null)));
+                        .body(new UploadResponse("500", e.getMessage(), null, null)));
             }
         });
 
