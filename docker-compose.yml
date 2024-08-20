@@ -1,0 +1,40 @@
+services:
+  db:
+    restart: always
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: midnight
+      MYSQL_USER: ohgiraffers
+      MYSQL_PASSWORD: ohgiraffers
+      MYSQL_SSL_CA: ""
+      MYSQL_SSL_CERT: ""
+      MYSQL_SSL_KEY: ""
+      TZ: "Asia/Seoul"
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/my.cnf
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: MY-USER
+      MINIO_ROOT_PASSWORD: MY-PASSWORD
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    profiles: ["storage", "required"]
+#      - storage
+
+
+
+volumes:
+  grafana-storage:
+  minio-data:
+  mc-config:

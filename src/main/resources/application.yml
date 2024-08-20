@@ -1,0 +1,33 @@
+server:
+  port: 8080
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url:  ${DB_USER_URL}
+    username: ${DB_USER_NAME}
+    password: ${DB_USER_PASSWORD}
+  jpa:
+    #    generate-ddl: false
+    show-sql: true
+    database: mysql
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+
+      ddl-auto: create
+  profiles:
+    active: prod
+
+jwt:
+  expiration_time: 86400000 #1일
+  secret: ${JWT_SECRET}
+
+
+minio:
+  url: http://localhost:9000
+  accessKey: MY-USER
+  secretKey: MY-PASSWORD
+  bucketName: sns-files
