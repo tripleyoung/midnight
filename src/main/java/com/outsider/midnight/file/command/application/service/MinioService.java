@@ -5,6 +5,7 @@ import io.minio.http.Method;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
@@ -18,7 +19,21 @@ public class MinioService {
     @Value("${minio.bucketName}")
     private String bucketName;
     private static final char separator = '_';
+    public boolean doesFileExist(String filename) throws Exception {
+        try {
+            minioClient.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(filename)
+                            .build()
+            );
+            return true;
+        } catch (ErrorResponseException e) {
+            // 파일이 존재하지 않을 때
 
+            throw e;
+        }
+    }
 
     public String uploadFile(MultipartFile file) throws Exception {
         // 버킷이 존재하는지 확인하고, 존재하지 않으면 생성
@@ -44,13 +59,31 @@ public class MinioService {
     }
 
     public String getFileUrl(String filename) throws Exception {
-        // Pre-signed URL 생성
-        return minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                        .method(Method.GET)
-                        .bucket(bucketName)
-                        .object(filename)
-                        .expiry(24 * 60 * 60) // 24시간 유효
-                        .build());
+        try {
+            // 객체가 존재하는지 확인
+            minioClient.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(filename)
+                            .build()
+            );
+
+            // 객체가 존재하면 프리사인드 URL 생성
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET)
+                            .bucket(bucketName)
+                            .object(filename)
+                            .expiry(24 * 60 * 60) // 24시간 유효
+                            .build()
+            );
+        } catch (ErrorResponseException e) {
+
+                // 다른 MinIO 관련 오류 처리
+                throw new RuntimeException("Error accessing MinIO: " + e.getMessage());
+        } catch (Exception e) {
+            // 기타 예외 처리
+            throw new RuntimeException("An unexpected error occurred: " + e.getMessage());
+        }
     }
 }

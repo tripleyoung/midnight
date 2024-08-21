@@ -14,6 +14,27 @@ public class AnalysisResult {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String imageName;
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String ttsFilename;
+
+    private String emotion;
+
+    public String getEmotion() {
+        return emotion;
+    }
+
+    public void setEmotion(String emotion) {
+        this.emotion = emotion;
+    }
+
+    public String getTtsFilename() {
+        return ttsFilename;
+    }
+
+    public void setTtsFilename(String ttsFilename) {
+        this.ttsFilename = ttsFilename;
+    }
 
     public String getImageName() {
         return imageName;
