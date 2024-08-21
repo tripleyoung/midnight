@@ -1,13 +1,13 @@
 server:
-  port: 8080
-  servlet:
-    async:
-      timeout: 2m
+  port: ${SERVER_PORT}
 logging:
   level:
     org.springframework.web.reactive.function.client.ExchangeFunctions: INFO
 
 spring:
+  mvc:
+    async:
+      request-timeout: 5m
   servlet:
     multipart:
       enabled: true
@@ -37,13 +37,11 @@ jwt:
   expiration_time: 86400000 #1일
   secret: ${JWT_SECRET}
 
-
-
 minio:
-  url: http://172.16.16.169:9000
-  accessKey: MY-USER
-  secretKey: MY-PASSWORD
-  bucketName: midnight-files
+  url: ${MINIO_SERVER_URL}
+  accessKey: ${MINIO_ACCESS_KEY}
+  secretKey:  ${MINIO_PASSWORD}
+  bucketName: ${MINIO_BUCKET_NAME}
 ai:
   server:
-    url: http://172.16.17.203:8000/analyze
+    url: ${AI_SERVER_URL}
