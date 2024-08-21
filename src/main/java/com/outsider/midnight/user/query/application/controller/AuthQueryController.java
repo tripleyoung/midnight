@@ -6,6 +6,7 @@ import com.outsider.midnight.user.command.application.service.AuthService;
 import com.outsider.midnight.user.command.infrastructure.service.CustomUserDetail;
 import com.outsider.midnight.user.query.application.service.UserInfoService;
 import com.outsider.midnight.util.UserId;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Optional;
-
+@Hidden
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthQueryController {

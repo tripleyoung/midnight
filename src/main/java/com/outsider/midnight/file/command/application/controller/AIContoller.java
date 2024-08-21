@@ -7,6 +7,12 @@ import com.outsider.midnight.file.command.application.service.AIService;
 import com.outsider.midnight.file.command.application.service.MinioService;
 import com.outsider.midnight.file.command.domain.aggregate.AnalysisResult;
 import com.outsider.midnight.file.command.domain.repository.AnalysisResultRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -40,9 +46,22 @@ public class AIContoller {
         this.aiResultRepository = aiResultRepository;
     }
 
+    @Operation(summary = "이미지 파일 업로드", description = "이미지 파일을 업로드하고 AI 인식 결과를 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UploadResponse.class)) }),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content),
+            @ApiResponse(responseCode = "500", description = "서버 오류",
+                    content = @Content)
+    })
 
-    @PostMapping("/upload")
-    public DeferredResult<ResponseEntity<UploadResponse>> uploadFile(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/upload", consumes = "multipart/form-data")
+    public DeferredResult<ResponseEntity<UploadResponse>> uploadFile(
+            @Parameter(description = "업로드할 이미지 파일", required = true,
+                    content = @Content(mediaType = "multipart/form-data"))
+            @RequestParam("file") MultipartFile file) {
         DeferredResult<ResponseEntity<UploadResponse>> deferredResult = new DeferredResult<>();
 
         // WebClient 생성
@@ -93,15 +112,5 @@ public class AIContoller {
         });
 
         return deferredResult;
-    }
-
-    @GetMapping("/url")
-    public ResponseEntity<String> getFileUrl(@RequestParam("filename") String filename) {
-        try {
-            String url = minioService.getFileUrl(filename);
-            return ResponseEntity.ok(url);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error generating file URL.");
-        }
     }
 }
